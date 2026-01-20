@@ -129,7 +129,7 @@ main_options = list(heads.get(t_type, {}).keys())
 main = st.selectbox("Main Head", main_options)
 
 # Sub head selectbox
-sub_options = heads[t_type][main]
+sub = st.radio("Sub Head", sub_options)
 sub = st.selectbox("Sub Head", sub_options)
 
 # Narration input
