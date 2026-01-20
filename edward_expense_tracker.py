@@ -5,41 +5,49 @@ from google.oauth2.service_account import Credentials
 import json
 
 # ---------------- THEME ----------------
-# ---------------- THEME ----------------
 st.markdown(
     """
     <style>
+    /* App background & text */
     .stApp { 
-        background-color: #f5f5f5; 
+        background-color: #F9FAFB;  /* Light Gray */
         color: #000000; 
     }
+
+    /* Buttons */
     .stButton>button { 
-        background-color: #ffffff; 
+        background-color: #FFFFFF;  /* White */
         color: #000000; 
-        border: 1px solid #888888; 
+        border: 1px solid #9CA3AF;  /* Cool Gray border */
     }
+
+    /* Text Inputs */
     .stTextInput>div>input { 
-        background-color: #ffffff; 
+        background-color: #FFFFFF; 
         color: #000000; 
-        border: 1px solid #888888; 
+        border: 1px solid #9CA3AF; 
     }
+
+    /* Selectboxes */
     .stSelectbox>div>div>div { 
-        background-color: #ffffff; 
+        background-color: #FFFFFF; 
         color: #000000; 
-        border: 1px solid #888888; 
+        border: 1px solid #9CA3AF; 
     }
+
+    /* Success messages */
     .stSuccess { 
-        background-color: #dddddd !important; 
-        color: #000000 !important; 
+        background-color: #ECFDF5 !important;  /* Mint Green */
+        color: #10B981 !important;            /* Emerald Green */
     }
-    
-    /* Make all Streamlit labels/headings black */
+
+    /* All headings */
     .stMarkdown h1, .stMarkdown h2, .stMarkdown h3, 
     .stMarkdown h4, .stMarkdown h5, .stMarkdown h6 {
         color: #000000 !important;
     }
-    
-    /* Label styling for all form elements */
+
+    /* Labels */
     [data-testid="stForm"] label,
     [data-testid="column"] label,
     .stSelectbox label,
@@ -47,13 +55,12 @@ st.markdown(
         color: #000000 !important;
         font-weight: 500;
     }
-    
-    /* Widget labels specifically */
+
     div[data-testid="stHorizontalBlock"] > div > label,
     div.element-container > div > label {
         color: #000000 !important;
     }
-    
+
     /* Title and subheader */
     .stMarkdown > h1,
     .stMarkdown > h2 {
@@ -131,7 +138,7 @@ if "narration" not in st.session_state:
     st.session_state.narration = ""
 
 # Type selectbox
-t_type = st.selectbox("Type", ["Income", "Expense"])
+t_type = st.selectbox("Type", ["Income", "Expense"], index=1)  # Default Expense
 
 # Main head selectbox
 main_options = list(heads.get(t_type, {}).keys())
@@ -147,20 +154,28 @@ narration = st.text_input("Narration (optional)", key="narration")
 # Amount input (blank by default)
 amount_text = st.text_input("Amount", key="amount_text")
 
-# Save transaction button
-if st.button("Save Transaction"):
-    if not amount_text.strip():
-        st.warning("Please enter amount")
-    else:
-        append_transaction(
-            t_type,
-            main,
-            sub,
-            narration or "-",
-            float(amount_text)
-        )
-        st.success("Transaction saved!")
+# Buttons: Save and Reset
+col1, col2 = st.columns(2)
 
-        # Clear inputs
+with col1:
+    if st.button("Save Transaction"):
+        if not amount_text.strip():
+            st.warning("Please enter amount")
+        else:
+            append_transaction(
+                t_type,
+                main,
+                sub,
+                narration or "-",
+                float(amount_text)
+            )
+            st.success("Transaction saved!")
+            # Clear inputs
+            st.session_state.narration = ""
+            st.session_state.amount_text = ""
+
+with col2:
+    if st.button("Reset"):
         st.session_state.narration = ""
         st.session_state.amount_text = ""
+        st.success("Form cleared!")
