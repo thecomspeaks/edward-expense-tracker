@@ -27,7 +27,7 @@ creds = Credentials.from_service_account_info(
 gc = gspread.authorize(creds)
 
 # ---------- Connect to Google Sheet ----------
-SHEET_ID = "1fawsdd4TvuSbMRmczRtV_UtXE5Xe1YRM-jCR_UL80Rw"
+SHEET_ID = "1fawsdd4TvuSbMRmczRtV_UtXE5Xe1YRM-jCR_UL80Rw"  # Your sheet ID
 worksheet_name = "Transactions"
 spreadsheet = gc.open_by_key(SHEET_ID)
 worksheet = spreadsheet.worksheet(worksheet_name)
@@ -49,21 +49,16 @@ def append_transaction(t_type, main, sub, narration, amount):
     timestamp = now.strftime("%Y-%m-%d %H:%M:%S")
     worksheet.append_row([date_str, t_type, main, sub, narration, amount, timestamp])
 
-# ---------- Initialise session_state defaults ----------
-if "t_type" not in st.session_state:
-    st.session_state.t_type = "Expense"
-if "main" not in st.session_state:
-    st.session_state.main = "Health & Fitness"
-if "sub" not in st.session_state:
-    st.session_state.sub = ""
-if "narration" not in st.session_state:
-    st.session_state.narration = ""
-if "amount_text" not in st.session_state:
-    st.session_state.amount_text = ""
-
 # ---------- Streamlit App ----------
 st.title("Edward Expense Tracker")
 st.subheader(f"{indian_greeting()}")
+
+# Maintain selected main head
+if "main" not in st.session_state:
+    st.session_state.main = "Health & Fitness"
+
+# Transaction type
+t_type = st.selectbox("Type", ["Income", "Expense"], key="type_select")
 
 # Main heads & subheads
 main_heads = {
@@ -84,55 +79,38 @@ sub_heads = {
     "Family Support": ["Money sent to Brother", "Money sent to Mother", "Family medicines (Mother/Brother)"]
 }
 
-# Transaction type (bind to session_state)
-t_type = st.selectbox(
-    "Type",
-    ["Income", "Expense"],
-    key="t_type",
-)
+# Dynamic main head
+main = st.selectbox("Main Head", main_heads[t_type], key="main_select",
+                    on_change=lambda: st.session_state.update({"sub": None}))
 
-# Dynamic main head (bind to session_state)
-main = st.selectbox(
-    "Main Head",
-    main_heads[t_type],
-    key="main",
-)
-
-# Dynamic subhead (bind to session_state)
+# Dynamic subhead
 sub_options = sub_heads.get(main, ["Other"])
-# IMPORTANT: give default value from session_state if present, else first option
-if st.session_state.sub not in sub_options:
-    st.session_state.sub = sub_options[0]
-
-sub = st.selectbox(
-    "Sub Head",
-    sub_options,
-    key="sub",
-)
+sub = st.selectbox("Sub Head", sub_options, key="sub_select")
 
 # Narration
-narration = st.text_input(
-    "Narration (optional)",
-    key="narration",
-)
+narration = st.text_input("Narration (optional)", key="narration")
 
 # Amount input (blank by default)
-amount_text = st.text_input(
-    "Amount",
-    value=st.session_state.amount_text,
-    key="amount_text",
-)
+amount_text = st.text_input("Amount", value="", key="amount_text")
 
-# Save button
-if st.button("Save Transaction"):
-    amt_value = float(amount_text) if amount_text.strip() else 0.0
-    append_transaction(t_type, main, sub, narration or "-", amt_value)
-
-    # RESET ALL FIELDS HERE
-    st.session_state.t_type = "Expense"
-    st.session_state.main = "Health & Fitness"
-    st.session_state.sub = ""          # will be corrected to first option on next run
-    st.session_state.narration = ""
-    st.session_state.amount_text = ""
-
-    st.success("Transaction saved!")
+# Buttons in a row - Save and Reset
+col1, col2 = st.columns(2)
+with col1:
+    if st.button("Save Transaction"):
+        amt_value = float(amount_text) if amount_text.strip() else 0.0
+        append_transaction(t_type, main, sub, narration or "-", amt_value)
+        st.success("Transaction saved!")
+        # Reset inputs
+        st.session_state.update({
+            "narration": "",
+            "amount_text": "",
+            "main_select": main,
+            "sub_select": sub_options[0]
+        })
+with col2:
+    if st.button("Reset"):
+        st.session_state.update({
+            "narration": "",
+            "amount_text": ""
+        })
+        st.rerun()
