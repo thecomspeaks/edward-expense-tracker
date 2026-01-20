@@ -8,29 +8,38 @@ import json
 st.markdown(
     """
     <style>
+    /* App background */
     .stApp { 
-        background-color: #F9FAFB;  /* Light Gray background */
+        background-color: #F9FAFB;  /* Light Gray */
         color: #000000; 
     }
-    .stButton>button { 
-        background-color: #FFFFFF;  /* White buttons */
-        color: #000000; 
-        border: 1px solid #9CA3AF;  /* Cool Gray border */
+
+    /* Buttons */
+    button[kind="primary"], .stButton>button {
+        background-color: #FFFFFF; /* White */
+        color: #000000;
+        border: 1px solid #9CA3AF; /* Cool Gray */
         font-weight: 500;
     }
-    .stTextInput>div>input { 
-        background-color: #FFFFFF; 
-        color: #000000; 
-        border: 1px solid #9CA3AF; 
+
+    /* Text input */
+    .stTextInput>div>input {
+        background-color: #FFFFFF;
+        color: #000000;
+        border: 1px solid #9CA3AF;
     }
-    .stSelectbox>div>div>div { 
-        background-color: #FFFFFF; 
-        color: #000000; 
-        border: 1px solid #9CA3AF; 
+
+    /* Radio & Selectbox */
+    .stRadio>div>div>label, .stSelectbox>div>div>div {
+        background-color: #FFFFFF;
+        color: #000000;
+        border: 1px solid #9CA3AF;
     }
-    .stSuccess { 
-        background-color: #ECFDF5 !important;  /* Mint Green background */
-        color: #10B981 !important;            /* Emerald Green text */
+
+    /* Success message */
+    [data-testid="stSuccess"] {
+        background-color: #ECFDF5 !important;  /* Mint Green */
+        color: #10B981 !important;             /* Emerald Green text */
     }
 
     /* Titles and headings */
@@ -39,7 +48,7 @@ st.markdown(
     }
 
     /* Labels */
-    label, .stTextInput label, .stSelectbox label {
+    label, .stTextInput label, .stSelectbox label, .stRadio label {
         color: #000000 !important;
         font-weight: 500;
     }
@@ -112,15 +121,15 @@ if "narration" not in st.session_state:
     st.session_state.narration = ""
 
 # Type selectbox
-t_type = st.selectbox("Type", ["Income", "Expense"])
+t_type = st.selectbox("Type", ["Income", "Expense"], index=1)  # default = Expense
 
 # Main head selectbox
 main_options = list(heads.get(t_type, {}).keys())
 main = st.selectbox("Main Head", main_options)
 
-# Sub head selectbox
+# Sub head radio (mobile-friendly)
 sub_options = heads[t_type][main]
-sub = st.selectbox("Sub Head", sub_options)
+sub = st.radio("Sub Head", sub_options)
 
 # Narration input
 narration = st.text_input("Narration (optional)", key="narration")
