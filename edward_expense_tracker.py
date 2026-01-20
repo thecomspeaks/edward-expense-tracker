@@ -1,4 +1,56 @@
 import streamlit as st
+from datetime import datetime, timedelta
+import gspread
+from google.oauth2.service_account import Credentials
+import json
+
+# ---------- Theme: Black, White & Grey ----------
+st.markdown(
+    """
+    <style>
+    .stApp { background-color: #f5f5f5; color: #000000; }
+    .stButton>button { background-color: #ffffff; color: #000000; border: 1px solid #888888; }
+    .stTextInput>div>input { background-color: #ffffff; color: #000000; border: 1px solid #888888; }
+    .stSelectbox>div>div>div { background-color: #ffffff; color: #000000; border: 1px solid #888888; }
+    .stNumberInput>div>input { background-color: #ffffff; color: #000000; border: 1px solid #888888; }
+    .stSuccess { background-color: #dddddd !important; color: #000000 !important; }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+# ---------- Google Sheets Authentication ----------
+sa_info = json.loads(st.secrets["google_service_account"]["key"])
+creds = Credentials.from_service_account_info(
+    sa_info,
+    scopes=["https://www.googleapis.com/auth/spreadsheets"]
+)
+gc = gspread.authorize(creds)
+
+# ---------- Connect to Google Sheet ----------
+SHEET_ID = "1fawsdd4TvuSbMRmczRtV_UtXE5Xe1YRM-jCR_UL80Rw"  # Replace with your sheet ID
+worksheet_name = "Transactions"  # Replace with your tab name
+spreadsheet = gc.open_by_key(SHEET_ID)
+worksheet = spreadsheet.worksheet(worksheet_name)
+
+# ---------- Helper Functions ----------
+def indian_greeting():
+    now = datetime.utcnow() + timedelta(hours=5, minutes=30)
+    hour = now.hour
+    if hour < 12:
+        return "Good morning"
+    elif hour < 18:
+        return "Good afternoon"
+    else:
+        return "Good evening"
+
+def append_transaction(t_type, main, sub, narration, amount):
+    now = datetime.utcnow() + timedelta(hours=5, minutes=30)
+    date_str = now.strftime("%Y-%m-%d")
+    timestamp = now.strftime("%Y-%m-%d %H:%M:%S")
+    worksheet.append_row([date_str, t_type, main, sub, narration, amount, timestamp])
+
+# ---------- Streamlit App ----------
 st.title("💰 Edward Expense Tracker")
 st.subheader(f"{indian_greeting()} 👋")
 
