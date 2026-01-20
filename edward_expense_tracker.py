@@ -1,3 +1,4 @@
+import streamlit as st
 st.title("💰 Edward Expense Tracker")
 st.subheader(f"{indian_greeting()} 👋")
 
