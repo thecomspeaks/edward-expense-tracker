@@ -5,14 +5,60 @@ from google.oauth2.service_account import Credentials
 import json
 
 # ---------------- THEME ----------------
+# ---------------- THEME ----------------
 st.markdown(
     """
     <style>
-    .stApp { background-color: #f5f5f5; color: #000000; }
-    .stButton>button { background-color: #ffffff; color: #000000; border: 1px solid #888888; }
-    .stTextInput>div>input { background-color: #ffffff; color: #000000; border: 1px solid #888888; }
-    .stSelectbox>div>div>div { background-color: #ffffff; color: #000000; border: 1px solid #888888; }
-    .stSuccess { background-color: #dddddd !important; color: #000000 !important; }
+    .stApp { 
+        background-color: #f5f5f5; 
+        color: #000000; 
+    }
+    .stButton>button { 
+        background-color: #ffffff; 
+        color: #000000; 
+        border: 1px solid #888888; 
+    }
+    .stTextInput>div>input { 
+        background-color: #ffffff; 
+        color: #000000; 
+        border: 1px solid #888888; 
+    }
+    .stSelectbox>div>div>div { 
+        background-color: #ffffff; 
+        color: #000000; 
+        border: 1px solid #888888; 
+    }
+    .stSuccess { 
+        background-color: #dddddd !important; 
+        color: #000000 !important; 
+    }
+    
+    /* Make all Streamlit labels/headings black */
+    .stMarkdown h1, .stMarkdown h2, .stMarkdown h3, 
+    .stMarkdown h4, .stMarkdown h5, .stMarkdown h6 {
+        color: #000000 !important;
+    }
+    
+    /* Label styling for all form elements */
+    [data-testid="stForm"] label,
+    [data-testid="column"] label,
+    .stSelectbox label,
+    .stTextInput label {
+        color: #000000 !important;
+        font-weight: 500;
+    }
+    
+    /* Widget labels specifically */
+    div[data-testid="stHorizontalBlock"] > div > label,
+    div.element-container > div > label {
+        color: #000000 !important;
+    }
+    
+    /* Title and subheader */
+    .stMarkdown > h1,
+    .stMarkdown > h2 {
+        color: #000000 !important;
+    }
     </style>
     """,
     unsafe_allow_html=True
