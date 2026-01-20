@@ -1,7 +1,8 @@
 import streamlit as st
 from datetime import datetime, timedelta
 import gspread
-from google.auth import default
+from google.oauth2.service_account import Credentials
+import json
 
 # ---------- Theme: Black, White & Grey ----------
 st.markdown(
@@ -19,13 +20,17 @@ st.markdown(
 )
 
 # ---------- Google Sheets Authentication ----------
-creds, _ = default()  # Uses Streamlit Cloud authentication
+# Using the secret uploaded in Streamlit Cloud
+sa_info = json.loads(st.secrets["google_service_account"]["key"])
+creds = Credentials.from_service_account_info(
+    sa_info,
+    scopes=["https://www.googleapis.com/auth/spreadsheets"]
+)
 gc = gspread.authorize(creds)
 
 # ---------- Connect to your Google Sheet ----------
-SHEET_ID = "1fawsdd4TvuSbMRmczRtV_UtXE5Xe1YRM-jCR_UL80Rw"  # Your Sheet ID
-worksheet_name = "Transactions"  # Your tab name
-
+SHEET_ID = "1fawsdd4TvuSbMRmczRtV_UtXE5Xe1YRM-jCR_UL80Rw"  # Replace with your sheet ID
+worksheet_name = "Transactions"  # Replace with your tab name
 spreadsheet = gc.open_by_key(SHEET_ID)
 worksheet = spreadsheet.worksheet(worksheet_name)
 
@@ -43,40 +48,39 @@ def indian_greeting():
 def append_transaction(t_type, main, sub, narration, amount):
     now = datetime.utcnow() + timedelta(hours=5, minutes=30)
     date_str = now.strftime("%Y-%m-%d")
-    month_str = now.strftime("%b-%Y")
     timestamp = now.strftime("%Y-%m-%d %H:%M:%S")
-    worksheet.append_row([date_str, t_type, main, sub, narration, amount, month_str, timestamp])
+    worksheet.append_row([date_str, t_type, main, sub, narration, amount, timestamp])
 
 # ---------- Streamlit App ----------
 st.title("💰 Edward Expense Tracker")
 st.subheader(f"{indian_greeting()} 👋")
 
-if st.button("📒 Record Transaction"):
-    with st.form("transaction_form"):
-        t_type = st.selectbox("Type", ["Income", "Expense"])
-        
-        main_heads = {
-            "Income": ["Salary", "Other"],
-            "Expense": ["Health & Fitness", "Groceries & Household", "Entertainment",
-                        "Transportation", "Debt Repayment", "Donations", "Utilities", "Family Support"]
-        }
+with st.form("transaction_form"):
+    t_type = st.selectbox("Type", ["Income", "Expense"])
+    
+    main_heads = {
+        "Income": ["Salary", "Other"],
+        "Expense": ["Health & Fitness", "Groceries & Household", "Entertainment",
+                    "Transportation", "Debt Repayment", "Donations", "Utilities", "Family Support"]
+    }
 
-        sub_heads = {
-            "Health & Fitness": ["Gym fee", "Protein"],
-            "Groceries & Household": ["Fruits", "Soap, paste, shampoo"],
-            "Entertainment": ["Netflix recharge", "Mastmaga news fees", "Movie ticket"],
-            "Transportation": ["Bus ticket", "Auto charges"],
-            "Debt Repayment": ["Credit card repayment", "Bank loan"],
-            "Donations": ["Church offerings", "Other donation"],
-            "Utilities": ["Mobile recharge (Self)", "Mobile recharge (Brother)", "Mobile recharge (Mother)"],
-            "Family Support": ["Money sent to Brother", "Money sent to Mother", "Family medicines (Mother/Brother)"]
-        }
+    sub_heads = {
+        "Health & Fitness": ["Gym fee", "Protein"],
+        "Groceries & Household": ["Fruits", "Soap, paste, shampoo"],
+        "Entertainment": ["Netflix recharge", "Mastmaga news fees", "Movie ticket"],
+        "Transportation": ["Bus ticket", "Auto charges"],
+        "Debt Repayment": ["Credit card repayment", "Bank loan"],
+        "Donations": ["Church offerings", "Other donation"],
+        "Utilities": ["Mobile recharge (Self)", "Mobile recharge (Brother)", "Mobile recharge (Mother)"],
+        "Family Support": ["Money sent to Brother", "Money sent to Mother", "Family medicines (Mother/Brother)"]
+    }
 
-        main = st.selectbox("Main Head", main_heads[t_type])
-        sub = st.selectbox("Sub Head", sub_heads.get(main, ["Other"]))
-        narration = st.text_input("Narration (optional)")
-        amount = st.number_input("Amount", min_value=0.0, step=1.0)
-        submitted = st.form_submit_button("Save Transaction")
-        if submitted:
-            append_transaction(t_type, main, sub, narration or "-", amount)
-            st.success("✅ Transaction saved!")
+    main = st.selectbox("Main Head", main_heads[t_type])
+    sub = st.selectbox("Sub Head", sub_heads.get(main, ["Other"]))
+    narration = st.text_input("Narration (optional)")
+    amount = st.number_input("Amount", min_value=0.0, step=1.0)
+    submitted = st.form_submit_button("Save Transaction")
+    
+    if submitted:
+        append_transaction(t_type, main, sub, narration or "-", amount)
+        st.success("✅ Transaction saved!")
