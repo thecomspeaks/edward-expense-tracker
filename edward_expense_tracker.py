@@ -8,63 +8,40 @@ import json
 st.markdown(
     """
     <style>
-    /* App background & text */
     .stApp { 
-        background-color: #F9FAFB;  /* Light Gray */
+        background-color: #F9FAFB;  /* Light Gray background */
         color: #000000; 
     }
-
-    /* Buttons */
     .stButton>button { 
-        background-color: #FFFFFF;  /* White */
+        background-color: #FFFFFF;  /* White buttons */
         color: #000000; 
         border: 1px solid #9CA3AF;  /* Cool Gray border */
+        font-weight: 500;
     }
-
-    /* Text Inputs */
     .stTextInput>div>input { 
         background-color: #FFFFFF; 
         color: #000000; 
         border: 1px solid #9CA3AF; 
     }
-
-    /* Selectboxes */
     .stSelectbox>div>div>div { 
         background-color: #FFFFFF; 
         color: #000000; 
         border: 1px solid #9CA3AF; 
     }
-
-    /* Success messages */
     .stSuccess { 
-        background-color: #ECFDF5 !important;  /* Mint Green */
-        color: #10B981 !important;            /* Emerald Green */
+        background-color: #ECFDF5 !important;  /* Mint Green background */
+        color: #10B981 !important;            /* Emerald Green text */
     }
 
-    /* All headings */
-    .stMarkdown h1, .stMarkdown h2, .stMarkdown h3, 
-    .stMarkdown h4, .stMarkdown h5, .stMarkdown h6 {
+    /* Titles and headings */
+    .stMarkdown h1, .stMarkdown h2, .stMarkdown h3 {
         color: #000000 !important;
     }
 
     /* Labels */
-    [data-testid="stForm"] label,
-    [data-testid="column"] label,
-    .stSelectbox label,
-    .stTextInput label {
+    label, .stTextInput label, .stSelectbox label {
         color: #000000 !important;
         font-weight: 500;
-    }
-
-    div[data-testid="stHorizontalBlock"] > div > label,
-    div.element-container > div > label {
-        color: #000000 !important;
-    }
-
-    /* Title and subheader */
-    .stMarkdown > h1,
-    .stMarkdown > h2 {
-        color: #000000 !important;
     }
     </style>
     """,
@@ -109,10 +86,9 @@ def append_transaction(t_type, main, sub, narration, amount):
 
 # ---------------- READ HEADS SHEET ----------------
 data = heads_ws.get_all_values()
-
-types_row = data[0]  # Row 1 = Type (Income/Expense)
-main_row = data[1]   # Row 2 = Main heads
-sub_rows = data[2:]  # Row 3+ = Sub categories
+types_row = data[0]
+main_row = data[1]
+sub_rows = data[2:]
 
 heads = {}
 for col in range(len(main_row)):
@@ -120,12 +96,10 @@ for col in range(len(main_row)):
     main = main_row[col].strip()
     if not t or not main:
         continue
-
     subs = []
     for r in sub_rows:
         if col < len(r) and r[col].strip():
             subs.append(r[col].strip())
-
     heads.setdefault(t, {})[main] = subs or ["Other"]
 
 # ---------------- STREAMLIT UI ----------------
@@ -138,7 +112,7 @@ if "narration" not in st.session_state:
     st.session_state.narration = ""
 
 # Type selectbox
-t_type = st.selectbox("Type", ["Income", "Expense"], index=1)  # Default Expense
+t_type = st.selectbox("Type", ["Income", "Expense"])
 
 # Main head selectbox
 main_options = list(heads.get(t_type, {}).keys())
@@ -154,28 +128,19 @@ narration = st.text_input("Narration (optional)", key="narration")
 # Amount input (blank by default)
 amount_text = st.text_input("Amount", key="amount_text")
 
-# Buttons: Save and Reset
-col1, col2 = st.columns(2)
-
-with col1:
-    if st.button("Save Transaction"):
-        if not amount_text.strip():
-            st.warning("Please enter amount")
-        else:
-            append_transaction(
-                t_type,
-                main,
-                sub,
-                narration or "-",
-                float(amount_text)
-            )
-            st.success("Transaction saved!")
-            # Clear inputs
-            st.session_state.narration = ""
-            st.session_state.amount_text = ""
-
-with col2:
-    if st.button("Reset"):
+# Save transaction button
+if st.button("Save Transaction"):
+    if not amount_text.strip():
+        st.warning("Please enter amount")
+    else:
+        append_transaction(
+            t_type,
+            main,
+            sub,
+            narration or "-",
+            float(amount_text)
+        )
+        st.success("Transaction saved!")
+        # Clear inputs
         st.session_state.narration = ""
         st.session_state.amount_text = ""
-        st.success("Form cleared!")
