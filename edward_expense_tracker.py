@@ -122,7 +122,7 @@ for col in range(len(main_row)):
     heads.setdefault(t, {})[main] = subs or ["Other"]
 
 # ---------------- STREAMLIT UI ----------------
-st.title("Edward Expense Tracker")
+st.title("Edward's Expense Tracker")
 st.subheader(f"{indian_greeting()}, Edward Monthero!!")
 
 if "amount_text" not in st.session_state:
