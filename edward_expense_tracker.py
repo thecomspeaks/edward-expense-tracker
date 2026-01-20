@@ -12,7 +12,6 @@ st.markdown(
     .stButton>button { background-color: #ffffff; color: #000000; border: 1px solid #888888; }
     .stTextInput>div>input { background-color: #ffffff; color: #000000; border: 1px solid #888888; }
     .stSelectbox>div>div>div { background-color: #ffffff; color: #000000; border: 1px solid #888888; }
-    .stNumberInput>div>input { background-color: #ffffff; color: #000000; border: 1px solid #888888; }
     .stSuccess { background-color: #dddddd !important; color: #000000 !important; }
     </style>
     """,
@@ -28,8 +27,8 @@ creds = Credentials.from_service_account_info(
 gc = gspread.authorize(creds)
 
 # ---------- Connect to Google Sheet ----------
-SHEET_ID = "1fawsdd4TvuSbMRmczRtV_UtXE5Xe1YRM-jCR_UL80Rw"  # Replace with your sheet ID
-worksheet_name = "Transactions"  # Replace with your tab name
+SHEET_ID = "1fawsdd4TvuSbMRmczRtV_UtXE5Xe1YRM-jCR_UL80Rw"  # Your sheet ID
+worksheet_name = "Transactions"
 spreadsheet = gc.open_by_key(SHEET_ID)
 worksheet = spreadsheet.worksheet(worksheet_name)
 
@@ -51,19 +50,21 @@ def append_transaction(t_type, main, sub, narration, amount):
     worksheet.append_row([date_str, t_type, main, sub, narration, amount, timestamp])
 
 # ---------- Streamlit App ----------
-st.title("💰 Edward Expense Tracker")
-st.subheader(f"{indian_greeting()} 👋")
+st.title("Edward Expense Tracker")
+st.subheader(f"{indian_greeting()}")
 
 # Maintain selected main head
 if "main" not in st.session_state:
     st.session_state.main = "Health & Fitness"
 
+# Transaction type
 t_type = st.selectbox("Type", ["Income", "Expense"], key="type_select")
 
+# Main heads & subheads
 main_heads = {
     "Income": ["Salary", "Other"],
     "Expense": ["Health & Fitness", "Groceries & Household", "Entertainment",
-                "Transportation", "Debt Repayment", "Donations", "Utilities", "Family Support"]
+                "Transportation", "Debt Repayment", "Donations", "Investments", "Utilities", "Family Support"]
 }
 
 sub_heads = {
@@ -73,25 +74,34 @@ sub_heads = {
     "Transportation": ["Bus ticket", "Auto charges"],
     "Debt Repayment": ["Credit card repayment", "Bank loan"],
     "Donations": ["Church offerings", "Other donation"],
+    "Investments": ["KSFE chit fund", "Stock"],
     "Utilities": ["Mobile recharge (Self)", "Mobile recharge (Brother)", "Mobile recharge (Mother)"],
     "Family Support": ["Money sent to Brother", "Money sent to Mother", "Family medicines (Mother/Brother)"]
 }
 
-# Dynamic main head selectbox
+# Dynamic main head
 main = st.selectbox("Main Head", main_heads[t_type], key="main_select",
                     on_change=lambda: st.session_state.update({"sub": None}))
 
-# Dynamic sub head selectbox based on main
+# Dynamic subhead
 sub_options = sub_heads.get(main, ["Other"])
 sub = st.selectbox("Sub Head", sub_options, key="sub_select")
 
-# Other inputs
+# Narration
 narration = st.text_input("Narration (optional)", key="narration")
-amount = st.number_input("Amount", min_value=0.0, step=1.0, key="amount")
 
-# Save button outside the form for instant reactivity
+# Amount input (blank by default)
+amount_text = st.text_input("Amount", value="", key="amount_text")
+
+# Save button
 if st.button("Save Transaction"):
-    append_transaction(t_type, main, sub, narration or "-", amount)
-    st.success("✅ Transaction saved!")
+    amt_value = float(amount_text) if amount_text.strip() else 0.0
+    append_transaction(t_type, main, sub, narration or "-", amt_value)
+    st.success("Transaction saved!")
     # Reset inputs
-    st.session_state.update({"narration": "", "amount": 0.0, "main_select": main, "sub_select": sub_options[0]})
+    st.session_state.update({
+        "narration": "",
+        "amount_text": "",
+        "main_select": main,
+        "sub_select": sub_options[0]
+    })
