@@ -93,24 +93,15 @@ narration = st.text_input("Narration (optional)", key="narration")
 # Amount input (blank by default)
 amount_text = st.text_input("Amount", value="", key="amount_text")
 
-# Buttons in a row - Save and Reset
-col1, col2 = st.columns(2)
-with col1:
-    if st.button("Save Transaction"):
-        amt_value = float(amount_text) if amount_text.strip() else 0.0
-        append_transaction(t_type, main, sub, narration or "-", amt_value)
-        st.success("Transaction saved!")
-        # Reset inputs
-        st.session_state.update({
-            "narration": "",
-            "amount_text": "",
-            "main_select": main,
-            "sub_select": sub_options[0]
-        })
-with col2:
-    if st.button("Reset"):
-        st.session_state.update({
-            "narration": "",
-            "amount_text": ""
-        })
-        st.rerun()
+# Save button
+if st.button("Save Transaction"):
+    amt_value = float(amount_text) if amount_text.strip() else 0.0
+    append_transaction(t_type, main, sub, narration or "-", amt_value)
+    st.success("Transaction saved!")
+    # Reset inputs
+    st.session_state.update({
+        "narration": "",
+        "amount_text": "",
+        "main_select": main,
+        "sub_select": sub_options[0]
+    })
