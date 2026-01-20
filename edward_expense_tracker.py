@@ -8,47 +8,34 @@ import json
 st.markdown(
     """
     <style>
-    /* App background */
     .stApp { 
         background-color: #F9FAFB;  /* Light Gray */
         color: #000000; 
     }
-
-    /* Buttons */
     button[kind="primary"], .stButton>button {
         background-color: #FFFFFF; /* White */
         color: #000000;
         border: 1px solid #9CA3AF; /* Cool Gray */
         font-weight: 500;
     }
-
-    /* Text input */
     .stTextInput>div>input {
         background-color: #FFFFFF;
         color: #000000;
         border: 1px solid #9CA3AF;
     }
-
-    /* Radio & Selectbox */
-    .stRadio>div>div>label, .stSelectbox>div>div>div {
+    .stSelectbox>div>div>div {
         background-color: #FFFFFF;
         color: #000000;
         border: 1px solid #9CA3AF;
     }
-
-    /* Success message */
     [data-testid="stSuccess"] {
         background-color: #ECFDF5 !important;  /* Mint Green */
-        color: #10B981 !important;             /* Emerald Green text */
+        color: #10B981 !important;             /* Emerald Green */
     }
-
-    /* Titles and headings */
     .stMarkdown h1, .stMarkdown h2, .stMarkdown h3 {
         color: #000000 !important;
     }
-
-    /* Labels */
-    label, .stTextInput label, .stSelectbox label, .stRadio label {
+    label, .stTextInput label, .stSelectbox label {
         color: #000000 !important;
         font-weight: 500;
     }
@@ -120,16 +107,16 @@ if "amount_text" not in st.session_state:
 if "narration" not in st.session_state:
     st.session_state.narration = ""
 
-# Type selectbox
-t_type = st.selectbox("Type", ["Income", "Expense"], index=1)  # default = Expense
+# Type selectbox (Expense default)
+t_type = st.selectbox("Type", ["Income", "Expense"], index=1)
 
 # Main head selectbox
-main_options = list(heads.get(t_type, {}).keys())
+main_options = tuple(heads.get(t_type, {}).keys())  # tuple prevents mobile keyboard
 main = st.selectbox("Main Head", main_options)
 
-# Sub head radio (mobile-friendly)
-sub_options = heads[t_type][main]
-sub = st.radio("Sub Head", sub_options)
+# Sub head selectbox (tuple prevents mobile keyboard)
+sub_options = tuple(heads[t_type][main])
+sub = st.selectbox("Sub Head", sub_options)
 
 # Narration input
 narration = st.text_input("Narration (optional)", key="narration")
