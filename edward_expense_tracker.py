@@ -8,32 +8,41 @@ import json
 st.markdown(
     """
     <style>
+    /* Background */
     .stApp { 
-        background-color: #F9FAFB;  /* Light Gray background */
-        color: #000000; 
-    }
-    .stButton>button { 
-        background-color: #FFFFFF;  /* White buttons */
-        color: #000000; 
-        border: 1px solid #9CA3AF;  /* Cool Gray border */
-        font-weight: 500;
-    }
-    .stTextInput>div>input { 
-        background-color: #FFFFFF; 
-        color: #000000; 
-        border: 1px solid #9CA3AF; 
-    }
-    .stSelectbox>div>div>div { 
-        background-color: #FFFFFF; 
-        color: #000000; 
-        border: 1px solid #9CA3AF; 
-    }
-    .stSuccess { 
-        background-color: #ECFDF5 !important;  /* Mint Green background */
-        color: #10B981 !important;            /* Emerald Green text */
+        background-color: #F9FAFB !important;  /* Light Gray background */
+        color: #000000 !important;
     }
 
-    /* Titles and headings */
+    /* Buttons */
+    [data-testid="stButton"] button {
+        background-color: #FFFFFF !important;  /* White */
+        color: #000000 !important;
+        border: 1px solid #9CA3AF !important; /* Cool Gray */
+        font-weight: 500 !important;
+    }
+
+    /* Text Inputs */
+    [data-testid="stTextInput"] input {
+        background-color: #FFFFFF !important;
+        color: #000000 !important;
+        border: 1px solid #9CA3AF !important;
+    }
+
+    /* Selectboxes */
+    [data-testid="stSelectbox"] div[role="combobox"] {
+        background-color: #FFFFFF !important;
+        color: #000000 !important;
+        border: 1px solid #9CA3AF !important;
+    }
+
+    /* Success messages */
+    [data-testid="stSuccess"] {
+        background-color: #ECFDF5 !important;  /* Mint Green */
+        color: #10B981 !important;             /* Emerald Green */
+    }
+
+    /* Titles & headings */
     .stMarkdown h1, .stMarkdown h2, .stMarkdown h3 {
         color: #000000 !important;
     }
@@ -41,12 +50,13 @@ st.markdown(
     /* Labels */
     label, .stTextInput label, .stSelectbox label {
         color: #000000 !important;
-        font-weight: 500;
+        font-weight: 500 !important;
     }
     </style>
     """,
     unsafe_allow_html=True
 )
+
 
 # ---------------- GOOGLE SHEETS AUTH ----------------
 sa_info = json.loads(st.secrets["google_service_account"]["key"])
