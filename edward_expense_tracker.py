@@ -54,44 +54,38 @@ def append_transaction(t_type, main, sub, narration, amount):
         now.strftime("%Y-%m-%d %H:%M:%S")
     ])
 
-def load_heads():
-    data = heads_ws.get_all_values()
-    types_row = data[0]  # Row 1 = Type (Income/Expense)
-    main_row = data[1]   # Row 2 = Main heads
-    sub_rows = data[2:]  # Row 3+ = Sub categories
+# ---------------- READ HEADS SHEET ----------------
+data = heads_ws.get_all_values()
 
-    heads = {}
-    for col in range(len(main_row)):
-        t = types_row[col].strip()
-        main = main_row[col].strip()
-        if not t or not main:
-            continue
+types_row = data[0]  # Row 1 = Type (Income/Expense)
+main_row = data[1]   # Row 2 = Main heads
+sub_rows = data[2:]  # Row 3+ = Sub categories
 
-        subs = []
-        for r in sub_rows:
-            if col < len(r) and r[col].strip():
-                subs.append(r[col].strip())
+heads = {}
+for col in range(len(main_row)):
+    t = types_row[col].strip()
+    main = main_row[col].strip()
+    if not t or not main:
+        continue
 
-        heads.setdefault(t, {})[main] = subs or ["Other"]
-    return heads
+    subs = []
+    for r in sub_rows:
+        if col < len(r) and r[col].strip():
+            subs.append(r[col].strip())
+
+    heads.setdefault(t, {})[main] = subs or ["Other"]
 
 # ---------------- STREAMLIT UI ----------------
 st.title("Edward Expense Tracker")
 st.subheader(f"{indian_greeting()}, Edward Monthero!!")
 
-# Initialize session_state
 if "amount_text" not in st.session_state:
     st.session_state.amount_text = ""
 if "narration" not in st.session_state:
     st.session_state.narration = ""
-if "type_select" not in st.session_state:
-    st.session_state.type_select = "Expense"  # Default type
-
-# Load heads dynamically
-heads = load_heads()
 
 # Type selectbox
-t_type = st.selectbox("Type", ["Income", "Expense"], index=1, key="type_select")  # Default = Expense
+t_type = st.selectbox("Type", ["Income", "Expense"])
 
 # Main head selectbox
 main_options = list(heads.get(t_type, {}).keys())
@@ -107,28 +101,20 @@ narration = st.text_input("Narration (optional)", key="narration")
 # Amount input (blank by default)
 amount_text = st.text_input("Amount", key="amount_text")
 
-# Buttons: Save and Reset
-col1, col2 = st.columns(2)
+# Save transaction button
+if st.button("Save Transaction"):
+    if not amount_text.strip():
+        st.warning("Please enter amount")
+    else:
+        append_transaction(
+            t_type,
+            main,
+            sub,
+            narration or "-",
+            float(amount_text)
+        )
+        st.success("Transaction saved!")
 
-with col1:
-    if st.button("Save Transaction"):
-        if not amount_text.strip():
-            st.warning("Please enter amount")
-        else:
-            append_transaction(
-                t_type,
-                main,
-                sub,
-                narration or "-",
-                float(amount_text)
-            )
-            st.success("Transaction saved!")
-            # Clear inputs
-            st.session_state.narration = ""
-            st.session_state.amount_text = ""
-
-with col2:
-    if st.button("Reset"):
+        # Clear inputs
         st.session_state.narration = ""
         st.session_state.amount_text = ""
-        st.success("Form cleared!")
